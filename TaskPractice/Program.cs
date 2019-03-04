@@ -1,52 +1,64 @@
 ﻿using System;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TaskPractice
 {
+    class FilaAsync
+    {
+        public string Path { get; }
+
+        public FilaAsync(string path)
+        {
+            Path = path;
+        }
+
+        public void ReadFile()
+        {
+            using (StreamReader sr = new StreamReader(Path))
+            {
+                sr.ReadLine();
+            }
+        }
+
+        public void WriteFile(object obj)
+        {
+            string s = (string)obj;
+            try
+            {
+                using (StreamWriter sr = File.AppendText(Path))
+                {
+                    sr.WriteLine(s);
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Error");
+            }
+        }
+
+    }
+
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-            First();
-            await Second();
-            Third();
-            Forth();
-            Console.WriteLine("Hello World!");
+            Thread[] thread = new Thread[10];
 
-            Console.ReadLine();
+            for (int i = 0; i < thread.Length; i++)
+            {
+                thread[i] = new Thread(new ParameterizedThreadStart(new FilaAsync("file.txt").WriteFile));
+            }
+
+            for (int i = 0; i < thread.Length; i++)
+            {
+                thread[i].Start("Hello" + i);
+            }
+
+            Console.ReadKey();
+
         }
 
-        static async Task First()
-        {
-            await Task.Run(() => {
-                for (int i = 0; i < 10; i++)
-                    Console.Write(1);
-            });
-        }
-
-        static async Task Second()
-        {
-            await Task.Run(() => {
-                for (int i = 0; i < 10; i++)
-                    Console.Write(2);
-            });
-        }
-
-        static async Task Third()
-        {
-            await Task.Run(() => {
-                for (int i = 0; i < 10; i++)
-                    Console.Write(3);
-            });
-        }
-
-        static async Task Forth()
-        {
-            await Task.Run(() => {
-                for (int i = 0; i < 10; i++)
-                    Console.Write(4);
-            });
-        }
     }
 }
